@@ -17,13 +17,16 @@ def get_seed_list(seed_file):
     seed = []
 
     for line in seed_file:
-        seed.append(line.strip())
+        seed.append(line.strip().lower())
 
     return seed
 
 
 def relevant_score(score):
-    return float(score) != 0
+    return float(score) > 0.16 or float(score) < - 0.12
+
+def significant_p(pvalue):
+    return float(pvalue) < 0.05
 
 
 def find_networks(f):
@@ -33,8 +36,8 @@ def find_networks(f):
 
     for line in f:
         list_line = line.split("\t")
-        g1 = list_line[INDEX_G1]
-        g2 = list_line[INDEX_G2]
+        g1 = list_line[INDEX_G1].lower()
+        g2 = list_line[INDEX_G2].lower()
         score = list_line[INDEX_SCORE]
 
         # if the nodes are connected
@@ -91,11 +94,12 @@ def find_cropped_networks(f, seed, distance_from_seed):
         print("counter: %s" % counter)
         for line in f:
             list_line = line.split("\t")
-            g1 = list_line[INDEX_G1]
-            g2 = list_line[INDEX_G2]
+            g1 = list_line[INDEX_G1].lower()
+            g2 = list_line[INDEX_G2].lower()
             score = list_line[INDEX_SCORE]
+            p = list_line[INDEX_EXTRA_DATA]
             
-            if relevant_score(score):
+            if relevant_score(score) and significant_p(p):
                 if g1 in seeds or g2 in seeds:
                     gene_pairs.add(gene_pair_symbol(g1, g2))
                     if g1 in seeds:
@@ -134,8 +138,8 @@ def get_data_for_seeded_networks(seeded_networks, f, test):
 
     for line in f:
         list_line = line.split("\t")
-        g1 = list_line[INDEX_G1]
-        g2 = list_line[INDEX_G2]
+        g1 = list_line[INDEX_G1].lower()
+        g2 = list_line[INDEX_G2].lower()
         score = list_line[INDEX_SCORE]
         extra = list_line[INDEX_EXTRA_DATA:]
 
